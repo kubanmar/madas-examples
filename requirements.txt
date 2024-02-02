@@ -1,0 +1,2 @@
+madas==1.0.0
+jupyter
