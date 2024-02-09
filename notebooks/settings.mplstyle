@@ -1,0 +1,15 @@
+axes.linewidth : 3
+axes.labelsize : 30
+ytick.labelsize : 25
+xtick.labelsize : 25
+ytick.major.size : 10
+ytick.minor.size : 5
+ytick.major.width : 3
+ytick.minor.width : 3
+xtick.major.size : 10
+xtick.major.width : 3
+axes.titlesize : 30
+lines.linewidth : 3
+lines.markersize : 15
+legend.labelspacing : 0.2
+figure.figsize : 8, 8

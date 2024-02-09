@@ -1,1 +1,6 @@
 .ipynb_checkpoints
+notebooks/data
+*.svg
+*.zip
+*.json
+__pycache__
