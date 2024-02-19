@@ -56,10 +56,13 @@ def get_FHIaims_n_basis_functions(NOMAD_response: dict) -> int:
     return n_basis_functions
 
 @api_call
+def _get_control_in(mid: str) -> str:
+    return requests.get(f"https://nomad-lab.eu/prod/v1/api/v1/entries/{mid}/raw/control.in").text
+
 def get_FHIaims_kpoints(NOMAD_response: dict) -> List[int]:
     # kpoints are not parsed in the current version of the MetaInfo
     # therefore we extract them from the control.in file 
     mid = resolve_nested_dict(NOMAD_response, "archive/metadata/calc_id")
-    control_in_file = requests.get(f"https://nomad-lab.eu/prod/v1/api/v1/entries/{mid}/raw/control.in").text
+    control_in_file = _get_control_in(mid)
     kpoints = list(map(int, re.search("\s*k[_]grid\s*(\d+\s\d+\s\d+)\s*\n", control_in_file).group().strip().split()[-3:]))
     return kpoints
