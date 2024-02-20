@@ -1,8 +1,8 @@
-
 from typing import Callable
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.cm import get_cmap
+import matplotlib as mpl
 
 from madas.plotting import sub_numbers
 
@@ -140,6 +140,100 @@ def similarity_kpoint_nfunc_plot(similartiy_matrix: object,
     plt.yscale("log")
     plt.xlabel("Calculation index")
     plt.legend(fontsize=24, frameon=False)
+    if filename is not None:
+        plt.savefig(filename, format='svg', dpi=200)
+    if show:
+        plt.show()
+
+def plot_clustered_similarity_matrices_comparison(clus_first: object, 
+                                                  clus_second: object, 
+                                                  clus_third: object,
+                                                  filename: str | None = "AITools.svg",
+                                                  show: bool = True) -> None:
+    """
+    Plot three clustered similarity matrices in a 3x3 grid. 
+    """
+
+    def plot_similarity_matrix(matrix):
+        plt.imshow(matrix, interpolation='none')
+        plt.xlim(0,len(matrix)-1)
+        plt.ylim(0,len(matrix)-1)
+
+    mids_sorted_by_first_clusters = clus_first.get_mids_sorted_by_cluster_labels()
+    mids_sorted_by_second_clusters = clus_second.get_mids_sorted_by_cluster_labels()
+    mids_sorted_by_third_clusters = clus_third.get_mids_sorted_by_cluster_labels()
+
+    outer_figure = plt.figure(figsize = (14,14))
+    outer_axes = plt.gca()
+    plt.setp(outer_axes.spines.values(), visible=False) # remove outer spines
+    outer_axes.tick_params(left=False, labelleft=False)
+    outer_axes.tick_params(bottom=False, labelbottom=False)
+    gs = gridspec.GridSpec(3, 3, figure=outer_figure, wspace = 0.005, hspace = 0.05)
+
+    # first SORTED BY first
+    outer_figure.add_subplot(gs[0])
+    plot_similarity_matrix(clus_first.simat.get_sub_matrix(mids_sorted_by_first_clusters))
+    plt.title(f"{clus_first.simat.fp_name} similarity", pad=20, fontsize=30)
+    plt.ylabel(f"Sorting:\n{clus_first.simat.fp_name} clusters", fontsize=30)
+    plt.gca().tick_params(bottom=False, labelbottom=False)
+    plt.gca().ticklabel_format(style="scientific", scilimits=(0,0), axis="y", useMathText=True)
+
+    # second SORTED BY first
+    outer_figure.add_subplot(gs[1])
+    plot_similarity_matrix(clus_second.simat.get_sub_matrix(mids_sorted_by_first_clusters))
+    plt.title(f"{clus_second.simat.fp_name} similarity", pad=46, fontsize=30)
+    plt.gca().tick_params(bottom=False, labelbottom=False)
+    plt.gca().tick_params(left=False, labelleft=False)
+
+    # third SORTED BY first
+    outer_figure.add_subplot(gs[2])
+    plot_similarity_matrix(clus_third.simat.get_sub_matrix(mids_sorted_by_first_clusters))
+    plt.title(f"{clus_third.simat.fp_name} similarity", pad=46, fontsize=30)
+    plt.gca().tick_params(bottom=False, labelbottom=False)
+    plt.gca().tick_params(left=False, labelleft=False)
+
+
+    # first SORTED BY second
+    outer_figure.add_subplot(gs[3])
+    plot_similarity_matrix(clus_first.simat.get_sub_matrix(mids_sorted_by_second_clusters))
+    plt.gca().tick_params(bottom=False, labelbottom=False)
+    plt.ylabel(f"Sorting:\n{clus_second.simat.fp_name} clusters", fontsize=30)
+    plt.yticks(range(0,4000,1000), map(str, range(0,4,1)))
+
+    # second SORTED BY second
+    outer_figure.add_subplot(gs[4])
+    plot_similarity_matrix(clus_second.simat.get_sub_matrix(mids_sorted_by_second_clusters))
+    plt.gca().tick_params(left=False, labelleft=False)
+    plt.gca().tick_params(bottom=False, labelbottom=False)
+
+    # third SORTED BY second
+    outer_figure.add_subplot(gs[5])
+    plot_similarity_matrix(clus_third.simat.get_sub_matrix(mids_sorted_by_second_clusters))
+    plt.gca().tick_params(bottom=False, labelbottom=False)
+    plt.gca().tick_params(left=False, labelleft=False)
+        
+    # first SORTED BY third
+    outer_figure.add_subplot(gs[6])
+    plot_similarity_matrix(clus_first.simat.get_sub_matrix(mids_sorted_by_third_clusters))
+    plt.ylabel(f"Sorting:\n{clus_third.simat.fp_name} clusters", fontsize=30)
+    plt.yticks(range(0,4000,1000), map(str, range(0,4,1)))
+
+    # second SORTED BY third
+    outer_figure.add_subplot(gs[7])
+    plt.gca().tick_params(left=False, labelleft=False)
+    plot_similarity_matrix(clus_second.simat.get_sub_matrix(mids_sorted_by_third_clusters))
+    plt.xlabel("Material index", fontsize=30)
+
+    # third SORTED BY third
+    outer_figure.add_subplot(gs[8])
+    plt.gca().tick_params(left=False, labelleft=False)
+    plot_similarity_matrix(clus_third.simat.get_sub_matrix(mids_sorted_by_third_clusters))
+
+    # COLORBAR
+    cbar_ax = outer_axes.inset_axes([1.02, 0, 0.02, 1])
+    norm = mpl.colors.Normalize(vmin=0, vmax=1)
+    cb1 = mpl.colorbar.ColorbarBase(cbar_ax, norm=norm, orientation='vertical')
+    cb1.set_label('Similarity coefficient')
     if filename is not None:
         plt.savefig(filename, format='svg', dpi=200)
     if show:
