@@ -2,6 +2,7 @@ madas==1.0.0
 jupyter
 ase==3.22.1
 scikit-learn
+dscribe==2.1.0
 numpy
 matplotlib
 threshold_clusterer @ git+https://github.com/kubanmar/similarity_threshold_clusterer.git
