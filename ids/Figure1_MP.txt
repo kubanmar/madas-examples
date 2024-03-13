@@ -1,0 +1,14 @@
+# MP-IDs of Materials Project entries with formula NaCl
+mp-1095060
+mp-1120767
+mp-990084
+mp-1077288
+mp-1069676
+mp-1189265
+mp-1080771
+mp-1077015
+mp-1078558
+mp-1018810
+mp-1064484
+mp-22851
+mp-22862
