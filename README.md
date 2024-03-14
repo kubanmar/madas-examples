@@ -2,9 +2,9 @@
 
 This repository contains examples for the paper: 
 
-| `MADAS`: A Python framework for assessing similarity in materials-science data
-| Martin Kuban, Santiago Rigamonti, and Claudia Draxl
-| in preparation (2024)
+`MADAS`: A Python framework for assessing similarity in materials-science data  
+Martin Kuban, Santiago Rigamonti, and Claudia Draxl  
+in preparation (2024)  
 
 ## Installation
 
