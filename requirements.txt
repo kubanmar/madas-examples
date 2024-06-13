@@ -1,4 +1,4 @@
-madas==1.0.0
+madas==1.0.1
 jupyter
 ase==3.22.1
 scikit-learn
