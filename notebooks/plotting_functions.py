@@ -1,7 +1,6 @@
 from typing import Callable
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-from matplotlib.cm import get_cmap
 import matplotlib as mpl
 
 from madas.plotting import sub_numbers
@@ -25,7 +24,7 @@ class IdColorMap():
         else:
             assert len(order)==len(ids), "Must provide as many ordering variables as values"
             self._ids = [x[0] for x in sorted(zip(order, ids, key=lambda x: x[0]))]
-        self._cmap = get_cmap(color_map_name)
+        self._cmap = plt.get_cmap(color_map_name)
         self._sort_key = key
         
     @property
