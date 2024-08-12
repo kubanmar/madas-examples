@@ -12,19 +12,32 @@ def get_dos_values(NOMAD_response: dict) -> list:
     Get total DOS per unit cell and eV from NOMAD archive dictionary.
     """
     spin_channels = []
-    dos_paths = resolve_nested_dict(NOMAD_response, "archive/results/properties/electronic/dos_electronic/total")
+    try:
+        dos_paths = resolve_nested_dict(NOMAD_response, "archive/results/properties/electronic/dos_electronic/total")
+    except TypeError:
+        dos_paths = resolve_nested_dict(NOMAD_response, "archive/results/properties/electronic/dos_electronic/0/total")
     for path_ in dos_paths:
-        norm_factor = resolve_nested_dict(NOMAD_response, f'archive{path_}/normalization_factor')
-        dos = np.array(resolve_nested_dict(NOMAD_response, f'archive{path_}/value')) * norm_factor * electron_volt
+        path_ = path_[1:] if path_.startswith("#/") else path_
+        norm_factor = resolve_nested_dict(NOMAD_response, f'archive{path_}/normalization_factor', fail_on_key_error=True)
+        dos = np.array(resolve_nested_dict(NOMAD_response, f'archive{path_}/value', fail_on_key_error=True)) * norm_factor * electron_volt
         spin_channels.append(dos)
     return sum(spin_channels).tolist()
     
-def get_dos_energies(NOMAD_response: dict) -> list:
+def get_dos_energies_vbm(NOMAD_response: dict) -> list:
     """
-    Get DOS energies in eV from aNOMAD archive dictionary.
+    Get DOS energies in eV from a NOMAD archive dictionary, normalized such that E=0 is at the VBM.
     """
-    energies_path = resolve_nested_dict(NOMAD_response, "archive/results/properties/electronic/dos_electronic/energies")
-    efermi = resolve_nested_dict(NOMAD_response, "archive/results/properties/electronic/dos_electronic/energy_fermi")
+    dos_results = resolve_nested_dict(NOMAD_response, "archive/results/properties/electronic/dos_electronic")
+    if isinstance(dos_results, list):
+        dos_results=dos_results[0]
+    energies_path = resolve_nested_dict(dos_results, "energies")
+    energies_path = energies_path[1:] if energies_path.startswith("#/") else energies_path
+    efermi_0 = resolve_nested_dict(dos_results, "band_gap/0/energy_highest_occupied")
+    try:
+        efermi_1 = resolve_nested_dict(dos_results, "band_gap/1/energy_highest_occupied")
+        efermi = max([efermi_0, efermi_1])
+    except IndexError:
+        efermi = efermi_0
     dos_energies = (np.array(resolve_nested_dict(NOMAD_response, f"archive{energies_path}")) - efermi) / electron_volt
     return dos_energies.tolist()
 
@@ -41,8 +54,7 @@ def get_total_energy_eV(NOMAD_response: dict) -> float:
     """
     Get total energy of the converged calculation from NOMAD archive dictionary.
     """
-    energy_path = resolve_nested_dict(NOMAD_response, "archive/workflow/0/calculation_result_ref")
-    energy = resolve_nested_dict(NOMAD_response, f"archive{energy_path}/energy/total/value") / electron_volt
+    energy = resolve_nested_dict(NOMAD_response, "archive/run/0/calculation/0/energy/total/value") / electron_volt
     return energy
 
 def get_FHIaims_n_basis_functions(NOMAD_response: dict) -> int:
@@ -55,14 +67,5 @@ def get_FHIaims_n_basis_functions(NOMAD_response: dict) -> int:
         n_basis_functions+=len(resolve_nested_dict(params, "x_fhi_aims_section_controlInOut_atom_species/0/x_fhi_aims_section_controlInOut_basis_func"))
     return n_basis_functions
 
-@api_call
-def _get_control_in(mid: str) -> str:
-    return requests.get(f"https://nomad-lab.eu/prod/v1/api/v1/entries/{mid}/raw/control.in").text
-
 def get_FHIaims_kpoints(NOMAD_response: dict) -> List[int]:
-    # kpoints are not parsed in the current version of the MetaInfo
-    # therefore we extract them from the control.in file 
-    mid = resolve_nested_dict(NOMAD_response, "archive/metadata/calc_id")
-    control_in_file = _get_control_in(mid)
-    kpoints = list(map(int, re.search("\s*k[_]grid\s*(\d+\s\d+\s\d+)\s*\n", control_in_file).group().strip().split()[-3:]))
-    return kpoints
+    return resolve_nested_dict(NOMAD_response, "archive/run/0/method/0/x_fhi_aims_controlInOut_k_grid")

@@ -112,7 +112,7 @@ def similarity_kpoint_nfunc_plot(similartiy_matrix: object,
                                  kpoints: list, 
                                  nfunc: list, 
                                  filename: str | None = "AlGaO3_convergence.svg",
-                                 show: bool = True) -> None:
+                                 show: bool = True, cmap="viridis") -> None:
     ROWS=1000
     outer_figure = plt.figure(figsize = (13,14))
     outer_axes = plt.gca()
@@ -120,7 +120,7 @@ def similarity_kpoint_nfunc_plot(similartiy_matrix: object,
     outer_axes.tick_params(left=False, labelleft=False, bottom=False, labelbottom=False)
     gs = gridspec.GridSpec(ROWS, 50, figure=outer_figure, wspace = 0, hspace = 0)
     outer_figure.add_subplot(gs[:int(ROWS*4/5),:])
-    plt.imshow(similartiy_matrix, interpolation="none", aspect="equal")
+    plt.imshow(similartiy_matrix, interpolation="none", aspect="equal", cmap=cmap)
     plt.grid()
     cbar = plt.colorbar()
     cbar.set_label("Similarity coefficient")
@@ -138,7 +138,7 @@ def similarity_kpoint_nfunc_plot(similartiy_matrix: object,
     plt.clim(0,1)
     plt.yscale("log")
     plt.xlabel("Calculation index")
-    plt.legend(fontsize=24, frameon=False)
+    plt.legend(fontsize=24, frameon=True, handlelength=1, fancybox=False, edgecolor="k")
     if filename is not None:
         plt.savefig(filename, format='svg', dpi=200)
     if show:
@@ -148,13 +148,13 @@ def plot_clustered_similarity_matrices_comparison(clus_first: object,
                                                   clus_second: object, 
                                                   clus_third: object,
                                                   filename: str | None = "AITools.svg",
-                                                  show: bool = True) -> None:
+                                                  show: bool = True, cmap="viridis") -> None:
     """
     Plot three clustered similarity matrices in a 3x3 grid. 
     """
 
     def plot_similarity_matrix(matrix):
-        plt.imshow(matrix, interpolation='none')
+        plt.imshow(matrix, interpolation='none', cmap=cmap)
         plt.xlim(0,len(matrix)-1)
         plt.ylim(0,len(matrix)-1)
 
@@ -231,7 +231,7 @@ def plot_clustered_similarity_matrices_comparison(clus_first: object,
     # COLORBAR
     cbar_ax = outer_axes.inset_axes([1.02, 0, 0.02, 1])
     norm = mpl.colors.Normalize(vmin=0, vmax=1)
-    cb1 = mpl.colorbar.ColorbarBase(cbar_ax, norm=norm, orientation='vertical')
+    cb1 = mpl.colorbar.ColorbarBase(cbar_ax, norm=norm, orientation='vertical', cmap=cmap)
     cb1.set_label('Similarity coefficient')
     if filename is not None:
         plt.savefig(filename, format='svg', dpi=200)
